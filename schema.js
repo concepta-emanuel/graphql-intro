@@ -8,9 +8,9 @@ import {
   GraphQLInt,
   GraphQLFloat,
   GraphQLEnumType,
-  GraphQLNonNull,
   GraphQLInterfaceType
 } from 'graphql/type';
+import GraphQLDateType from 'graphql-custom-datetype';
 
 let count = 0;
 

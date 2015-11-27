@@ -26,6 +26,7 @@
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
     "graphql": "^0.4.13",
+    "graphql-custom-datetype": "^0.2.1",
     "kerberos": "0.0.17",
     "mongoose": "^4.2.8",
     "underscore": "^1.8.3"
