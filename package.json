@@ -25,10 +25,11 @@
     "babel-register": "^6.2.0",
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
+    "express-graphql": "^0.4.5",
     "graphql": "^0.4.13",
     "graphql-custom-datetype": "^0.2.1",
     "kerberos": "0.0.17",
-    "mongoose": "^4.2.8",
+    "promised-mongo": "^1.2.0",
     "underscore": "^1.8.3"
   }
 }

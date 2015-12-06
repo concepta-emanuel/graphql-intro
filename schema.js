@@ -1,5 +1,12 @@
 import * as _ from 'underscore';
 
+import mongo from 'promised-mongo';
+
+// You can use any MONGO_URL here, whether it's locally or on cloud.
+let db = mongo('mongodb://192.241.185.168/graphql-custom');
+
+let authorsCollection = db.collection('authors');
+
 import {
   GraphQLList,
   GraphQLObjectType,
@@ -14,58 +21,57 @@ import GraphQLDateType from 'graphql-custom-datetype';
 
 let count = 0;
 
-const Author = new GraphQLObjectType({
-  name: "Author",
-  description: "Represent the type of an author of a blog post or a comment",
+let Author = new GraphQLObjectType({
+  name: 'Author',
+  description: 'Represent the type of an author of a blog post or a comment',
   fields: () => ({
     _id: {type: GraphQLString},
-    firstName: {type: GraphQLString},
-    lastName: {type: GraphQLString},
-    email: {type: GraphQLString}
+    name: {type: GraphQLString},
+    twitterHandle: {type: GraphQLString}
   })
 });
 
-let schema = new GraphQLSchema({
-  
-  query: new GraphQLObjectType({
-    name: 'RootQueryType',
-    fields: {
-      count: {
-        type: GraphQLInt,
-        resolve: function() {
-          return count;
-        }
+let Query = new GraphQLObjectType({
+  name: 'RootQuery',
+  fields: {
+    authors: {
+      type: new GraphQLList(Author),
+      resolve: function(rootValue, args, info) {
+        
+        let fields = {};
+        let fieldASTs = info.fieldASTs;
+        fieldASTs[0].selectionSet.selections.map(function(selection) {
+          fields[selection.name.value] = 1;
+        });
+        return authorsCollection.find({}, fields).toArray();
+        
       }
     }
-  }),
-  
-  mutation: new GraphQLObjectType({
-    name: 'RootMutationType',
-    fields: {
-      updateCount: {
-        type: GraphQLInt,
-        description: 'Updates the count',
-        resolve: function() {
-          count += 1;
-          return count;
-        }
-      },
-      postAuthor: {
-        type: Author,
-        description: "Create a new author",
-        args: {
-          firstName: {type: GraphQLString},
-          lastName: {type: GraphQLString},
-          email: {type: GraphQLString}
-        },
-        resolve: function(source, args) {
-
-          return author;
-        }
-      }      
-    }
-  })
-  
+  }
 });
 
-export default schema;
+let Mutation = new GraphQLObjectType({
+  name: 'Mutations',
+  fields: {
+    createAuthor: {
+      type: Author,
+      args: {
+        _id: {type: GraphQLString},
+        name: {type: GraphQLString},
+        twitterHandle: {type: GraphQLString}
+      },
+      resolve: function(rootValue, args) {
+        let author = Object.assign({}, args);
+        return authorsCollection.insert(author)
+          .then(_ => author);
+      }
+    }
+  }
+});
+
+let Schema = new GraphQLSchema({
+  query: Query,
+  mutation: Mutation
+});
+
+export default Schema;
